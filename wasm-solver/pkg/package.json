@@ -1,0 +1,15 @@
+{
+  "name": "wasm-solver",
+  "type": "module",
+  "version": "0.1.0",
+  "files": [
+    "wasm_solver_bg.wasm",
+    "wasm_solver.js",
+    "wasm_solver.d.ts"
+  ],
+  "main": "wasm_solver.js",
+  "types": "wasm_solver.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

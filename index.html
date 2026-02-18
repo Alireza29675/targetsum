@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Target Sum Finder | یافتن مجموع هدف</title>
+  <style>
+    :root {
+      --bg: #0f0f0f;
+      --surface: #1a1a1a;
+      --surface2: #242424;
+      --border: #333;
+      --text: #e0e0e0;
+      --text-dim: #888;
+      --accent: #4a9eff;
+      --accent-hover: #6db3ff;
+      --success: #4caf50;
+      --error: #f44336;
+      --warn: #ff9800;
+      --font-mono: 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 24px 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    header h1 {
+      font-size: 1.4rem;
+      font-weight: 600;
+    }
+
+    .lang-toggle {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: background 0.15s;
+    }
+    .lang-toggle:hover { background: var(--border); }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--accent);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 0.82rem;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    input[type="number"],
+    input[type="file"] {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-family: var(--font-mono);
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    input[type="number"]:focus {
+      border-color: var(--accent);
+    }
+
+    input[type="number"]::placeholder {
+      color: #555;
+    }
+
+    .file-upload {
+      position: relative;
+      background: var(--surface2);
+      border: 2px dashed var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .file-upload:hover,
+    .file-upload.dragover {
+      border-color: var(--accent);
+      background: rgba(74, 158, 255, 0.05);
+    }
+
+    .file-upload input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .file-upload-text {
+      color: var(--text-dim);
+      font-size: 0.9rem;
+    }
+
+    .file-info {
+      margin-top: 8px;
+      font-size: 0.82rem;
+      color: var(--success);
+      display: none;
+    }
+
+    .file-info.visible { display: block; }
+
+    .options-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .radio-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .radio-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .radio-group input[type="radio"] {
+      accent-color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+    }
+
+    .btn {
+      padding: 10px 28px;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--accent-hover); }
+
+    .btn-danger {
+      background: var(--error);
+      color: #fff;
+    }
+    .btn-danger:hover:not(:disabled) { background: #e53935; }
+
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover:not(:disabled) { background: var(--border); }
+
+    /* Results */
+    #results-panel { display: none; }
+    #results-panel.visible { display: block; }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      font-size: 0.85rem;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-weight: 600;
+      font-size: 0.82rem;
+    }
+
+    .status-found { background: rgba(76, 175, 80, 0.15); color: var(--success); }
+    .status-not-found { background: rgba(244, 67, 54, 0.15); color: var(--error); }
+    .status-cancelled { background: rgba(255, 152, 0, 0.15); color: var(--warn); }
+    .status-running { background: rgba(74, 158, 255, 0.15); color: var(--accent); }
+
+    .elapsed {
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+
+    .result-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    .result-table th {
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-dim);
+      font-weight: 500;
+      font-size: 0.78rem;
+    }
+
+    .result-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--surface2);
+    }
+
+    .combination-block {
+      background: var(--surface2);
+      border-radius: 6px;
+      padding: 12px 16px;
+      margin-bottom: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      word-break: break-all;
+    }
+
+    .combination-header {
+      color: var(--accent);
+      font-size: 0.78rem;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .validation-error {
+      color: var(--error);
+      font-size: 0.82rem;
+      margin-top: 4px;
+      display: none;
+    }
+    .validation-error.visible { display: block; }
+
+    .spinner {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .wasm-status {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+
+    .wasm-status.ready { color: var(--success); }
+    .wasm-status.loading { color: var(--warn); }
+    .wasm-status.error { color: var(--error); }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .form-row { grid-template-columns: 1fr; }
+      .options-row { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* RTL for Farsi */
+    html[dir="rtl"] { font-family: 'Vazirmatn', var(--font-sans); }
+    html[dir="rtl"] .result-table th { text-align: right; }
+
+    .results-scroll {
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .max-results-group {
+      display: none;
+    }
+    .max-results-group.visible {
+      display: flex;
+    }
+
+    /* Progress bar + live stats for streaming "find all" */
+    .progress-section {
+      display: none;
+      margin-bottom: 16px;
+    }
+    .progress-section.visible { display: block; }
+
+    .progress-bar-track {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .progress-stats {
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px 24px;
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+
+    .progress-stats .stat-value {
+      color: var(--text);
+      font-weight: 600;
+    }
+  </style>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 id="title">Target Sum Finder</h1>
+      <button class="lang-toggle" id="lang-btn" onclick="toggleLang()">فارسی</button>
+    </header>
+
+    <div id="wasm-status" class="wasm-status loading">
+      <span class="spinner"></span>
+      <span id="wasm-status-text">Loading WASM engine...</span>
+    </div>
+
+    <!-- CSV Upload -->
+    <div class="panel">
+      <div class="panel-title" id="lbl-upload">Upload Numbers</div>
+      <div class="file-upload" id="drop-zone">
+        <input type="file" id="csv-file" accept=".csv,.txt" />
+        <div class="file-upload-text" id="lbl-drop">
+          Drop CSV file here or click to browse
+        </div>
+      </div>
+      <div class="file-info" id="file-info"></div>
+      <div class="validation-error" id="csv-error"></div>
+    </div>
+
+    <!-- Parameters -->
+    <div class="panel">
+      <div class="panel-title" id="lbl-params">Parameters</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="target" id="lbl-target">Target Sum</label>
+          <input type="number" id="target" min="1" step="1" placeholder="e.g. 520">
+        </div>
+        <div class="form-group">
+          <label for="min-count" id="lbl-min">Min Elements</label>
+          <input type="number" id="min-count" min="1" step="1" value="1" placeholder="1">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="max-count" id="lbl-max">Max Elements</label>
+          <input type="number" id="max-count" min="1" step="1" value="10" placeholder="10">
+        </div>
+        <div class="form-group max-results-group" id="max-results-group">
+          <label for="max-results" id="lbl-max-results">Max Results</label>
+          <input type="number" id="max-results" min="1" step="1" value="100" placeholder="100">
+        </div>
+      </div>
+
+      <div class="options-row">
+        <label id="lbl-mode" style="color: var(--text-dim); font-size: 0.82rem;">Search Mode:</label>
+        <div class="radio-group">
+          <label>
+            <input type="radio" name="mode" value="first" checked>
+            <span id="lbl-first">First combination (fast)</span>
+          </label>
+          <label>
+            <input type="radio" name="mode" value="all">
+            <span id="lbl-all">All combinations</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="validation-error" id="param-error"></div>
+
+      <div class="actions">
+        <button class="btn btn-primary" id="run-btn" disabled onclick="runSearch()">
+          <span id="lbl-run">Run</span>
+        </button>
+        <button class="btn btn-danger" id="cancel-btn" disabled onclick="cancelSearch()">
+          <span id="lbl-cancel">Cancel</span>
+        </button>
+        <button class="btn btn-secondary" onclick="clearResults()">
+          <span id="lbl-clear">Clear</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div class="panel" id="results-panel">
+      <div class="panel-title" id="lbl-results">Results</div>
+      <div class="status-bar">
+        <span class="status-badge" id="status-badge"></span>
+        <span class="elapsed" id="elapsed"></span>
+      </div>
+      <div class="progress-section" id="progress-section">
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="progress-bar"></div>
+        </div>
+        <div class="progress-stats">
+          <span><span id="lbl-found-count">Found</span>: <span class="stat-value" id="stat-found">0</span></span>
+          <span><span id="lbl-nodes">Nodes</span>: <span class="stat-value" id="stat-nodes">0</span></span>
+          <span><span id="lbl-progress">Progress</span>: <span class="stat-value" id="stat-progress">0%</span></span>
+          <span><span id="lbl-elapsed-label">Elapsed</span>: <span class="stat-value" id="stat-elapsed">0s</span></span>
+        </div>
+      </div>
+      <div class="results-scroll" id="results-content"></div>
+    </div>
+  </div>
+
+  <script>
+    // ─── Internationalization ──────────────────────────────────────
+    const i18n = {
+      en: {
+        title: 'Target Sum Finder',
+        langBtn: 'فارسی',
+        wasmLoading: 'Loading WASM engine...',
+        wasmReady: 'WASM engine ready',
+        wasmError: 'WASM engine failed to load',
+        lblUpload: 'Upload Numbers',
+        lblDrop: 'Drop CSV file here or click to browse',
+        lblParams: 'Parameters',
+        lblTarget: 'Target Sum',
+        lblMin: 'Min Elements',
+        lblMax: 'Max Elements',
+        lblMaxResults: 'Max Results',
+        lblMode: 'Search Mode:',
+        lblFirst: 'First combination (fast)',
+        lblAll: 'All combinations',
+        lblRun: 'Run',
+        lblCancel: 'Cancel',
+        lblClear: 'Clear',
+        lblResults: 'Results',
+        statusFound: 'Found',
+        statusNotFound: 'No solution found',
+        statusCancelled: 'Cancelled',
+        statusRunning: 'Searching...',
+        elapsed: 'ms',
+        fileLoaded: (n) => `${n.toLocaleString('en')} numbers loaded`,
+        errNoFile: 'Please upload a CSV file',
+        errNoTarget: 'Please enter a target sum',
+        errMinMax: 'Min elements must be ≤ max elements',
+        errNoNumbers: 'No valid numbers found in CSV',
+        comboHeader: (i) => `Combination ${i}`,
+        comboCount: (n) => `${n} element${n > 1 ? 's' : ''}`,
+        totalCombos: (n) => `${n} combination${n > 1 ? 's' : ''} found`,
+        rowIndex: 'Row #',
+        rowValue: 'Value',
+        lblFoundCount: 'Found',
+        lblNodes: 'Nodes',
+        lblProgress: 'Progress',
+        lblElapsedLabel: 'Elapsed',
+      },
+      fa: {
+        title: 'یافتن مجموع هدف',
+        langBtn: 'English',
+        wasmLoading: '...در حال بارگذاری موتور محاسباتی',
+        wasmReady: 'موتور محاسباتی آماده است',
+        wasmError: 'خطا در بارگذاری موتور محاسباتی',
+        lblUpload: 'بارگذاری اعداد',
+        lblDrop: 'فایل CSV را اینجا بکشید یا کلیک کنید',
+        lblParams: 'پارامترها',
+        lblTarget: 'مجموع هدف',
+        lblMin: 'حداقل تعداد اعضا',
+        lblMax: 'حداکثر تعداد اعضا',
+        lblMaxResults: 'حداکثر نتایج',
+        lblMode: ':حالت جستجو',
+        lblFirst: '(سریع) اولین ترکیب',
+        lblAll: 'همه ترکیب‌ها',
+        lblRun: 'اجرا',
+        lblCancel: 'لغو',
+        lblClear: 'پاک کردن',
+        lblResults: 'نتایج',
+        statusFound: 'یافت شد',
+        statusNotFound: 'جوابی یافت نشد',
+        statusCancelled: 'لغو شد',
+        statusRunning: '...در حال جستجو',
+        elapsed: 'میلی‌ثانیه',
+        fileLoaded: (n) => `${n.toLocaleString('fa')} عدد بارگذاری شد`,
+        errNoFile: 'لطفا یک فایل CSV بارگذاری کنید',
+        errNoTarget: 'لطفا مجموع هدف را وارد کنید',
+        errMinMax: 'حداقل تعداد باید کمتر یا مساوی حداکثر باشد',
+        errNoNumbers: 'هیچ عدد معتبری در فایل یافت نشد',
+        comboHeader: (i) => `${i} ترکیب`,
+        comboCount: (n) => `${n} عضو`,
+        totalCombos: (n) => `${n} ترکیب یافت شد`,
+        rowIndex: '# ردیف',
+        rowValue: 'مقدار',
+        lblFoundCount: 'یافت شده',
+        lblNodes: 'گره‌ها',
+        lblProgress: 'پیشرفت',
+        lblElapsedLabel: 'زمان',
+      }
+    };
+
+    let lang = 'en';
+    let parsedNumbers = null;  // Float64Array for passing to WASM
+    let worker = null;
+    let wasmReady = false;
+    let isRunning = false;
+
+    function t(key) { return i18n[lang][key]; }
+
+    function toggleLang() {
+      lang = lang === 'en' ? 'fa' : 'en';
+      const dir = lang === 'fa' ? 'rtl' : 'ltr';
+      document.documentElement.lang = lang;
+      document.documentElement.dir = dir;
+      applyTranslations();
+    }
+
+    function applyTranslations() {
+      document.getElementById('title').textContent = t('title');
+      document.getElementById('lang-btn').textContent = t('langBtn');
+      document.getElementById('lbl-upload').textContent = t('lblUpload');
+      document.getElementById('lbl-drop').textContent = t('lblDrop');
+      document.getElementById('lbl-params').textContent = t('lblParams');
+      document.getElementById('lbl-target').textContent = t('lblTarget');
+      document.getElementById('lbl-min').textContent = t('lblMin');
+      document.getElementById('lbl-max').textContent = t('lblMax');
+      document.getElementById('lbl-max-results').textContent = t('lblMaxResults');
+      document.getElementById('lbl-mode').textContent = t('lblMode');
+      document.getElementById('lbl-first').textContent = t('lblFirst');
+      document.getElementById('lbl-all').textContent = t('lblAll');
+      document.getElementById('lbl-run').textContent = t('lblRun');
+      document.getElementById('lbl-cancel').textContent = t('lblCancel');
+      document.getElementById('lbl-clear').textContent = t('lblClear');
+      document.getElementById('lbl-results').textContent = t('lblResults');
+      document.getElementById('lbl-found-count').textContent = t('lblFoundCount');
+      document.getElementById('lbl-nodes').textContent = t('lblNodes');
+      document.getElementById('lbl-progress').textContent = t('lblProgress');
+      document.getElementById('lbl-elapsed-label').textContent = t('lblElapsedLabel');
+
+      // Re-apply wasm status text (use textContent to preserve DOM structure)
+      const statusTextEl = document.getElementById('wasm-status-text');
+      if (statusTextEl) {
+        if (wasmReady) {
+          statusTextEl.textContent = t('wasmReady');
+        } else {
+          statusTextEl.textContent = t('wasmLoading');
+        }
+      }
+    }
+
+    // ─── Mode toggle ──────────────────────────────────────────────
+    document.querySelectorAll('input[name="mode"]').forEach(r => {
+      r.addEventListener('change', () => {
+        const isAll = r.value === 'all' && r.checked;
+        document.getElementById('max-results-group').classList.toggle('visible', isAll);
+      });
+    });
+
+    // ─── CSV Parsing ──────────────────────────────────────────────
+    const dropZone = document.getElementById('drop-zone');
+    const csvInput = document.getElementById('csv-file');
+
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    csvInput.addEventListener('change', () => {
+      if (csvInput.files.length > 0) {
+        handleFile(csvInput.files[0]);
+      }
+    });
+
+    function handleFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        parseCSV(e.target.result);
+      };
+      reader.readAsText(file);
+    }
+
+    function parseCSV(text) {
+      const errEl = document.getElementById('csv-error');
+      const infoEl = document.getElementById('file-info');
+      errEl.classList.remove('visible');
+      infoEl.classList.remove('visible');
+
+      // Parse: each line may have multiple comma-separated values
+      const nums = [];
+      const lines = text.split(/[\r\n]+/);
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed) continue;
+        const parts = trimmed.split(/[,;\t]+/);
+        for (const part of parts) {
+          const cleaned = part.trim();
+          if (!cleaned) continue;
+          const n = Number(cleaned);
+          // Accept positive integers (allow floats to be truncated)
+          if (!isNaN(n) && isFinite(n) && n > 0) {
+            nums.push(Math.floor(n));
+          }
+        }
+      }
+
+      if (nums.length === 0) {
+        errEl.textContent = t('errNoNumbers');
+        errEl.classList.add('visible');
+        parsedNumbers = null;
+        updateRunButton();
+        return;
+      }
+
+      // Store as Float64Array (f64 can represent integers up to 2^53 exactly,
+      // which covers our 10^12 requirement since 10^12 < 2^40)
+      parsedNumbers = new Float64Array(nums);
+
+      infoEl.textContent = t('fileLoaded')(nums.length);
+      infoEl.classList.add('visible');
+      updateRunButton();
+    }
+
+    // ─── Worker Setup ─────────────────────────────────────────────
+    function initWorker() {
+      worker = new Worker('worker.js', { type: 'module' });
+
+      worker.onmessage = (e) => {
+        const msg = e.data;
+
+        if (msg.type === 'ready') {
+          wasmReady = true;
+          const statusEl = document.getElementById('wasm-status');
+          statusEl.classList.remove('loading');
+          statusEl.classList.add('ready');
+          // Use textContent on child span to preserve DOM structure
+          const textEl = document.getElementById('wasm-status-text');
+          if (textEl) textEl.textContent = t('wasmReady');
+          // Hide the spinner
+          const spinner = statusEl.querySelector('.spinner');
+          if (spinner) spinner.style.display = 'none';
+          updateRunButton();
+        } else if (msg.type === 'error') {
+          const statusEl = document.getElementById('wasm-status');
+          if (!wasmReady) {
+            statusEl.classList.remove('loading');
+            statusEl.classList.add('error');
+            const textEl = document.getElementById('wasm-status-text');
+            if (textEl) textEl.textContent = t('wasmError') + ': ' + msg.message;
+          }
+          if (isRunning) {
+            showError(msg.message);
+            setRunning(false);
+          }
+        } else if (msg.type === 'progress') {
+          updateProgress(msg.data);
+        } else if (msg.type === 'result') {
+          hideProgress();
+          displayResult(msg.data);
+          setRunning(false);
+        }
+      };
+
+      // Handle unrecoverable worker errors (e.g. WASM panic, syntax error)
+      worker.onerror = (e) => {
+        if (isRunning) {
+          showError('Worker crashed: ' + (e.message || 'Unknown error'));
+          setRunning(false);
+        }
+      };
+    }
+
+    initWorker();
+
+    // ─── Run/Cancel ───────────────────────────────────────────────
+    function updateRunButton() {
+      document.getElementById('run-btn').disabled = !wasmReady || !parsedNumbers || isRunning;
+    }
+
+    function setRunning(val) {
+      isRunning = val;
+      document.getElementById('run-btn').disabled = val;
+      document.getElementById('cancel-btn').disabled = !val;
+      updateRunButton();
+    }
+
+    function validate() {
+      const errEl = document.getElementById('param-error');
+      errEl.classList.remove('visible');
+
+      if (!parsedNumbers) {
+        showParamError(t('errNoFile'));
+        return false;
+      }
+
+      const target = document.getElementById('target').value;
+      if (!target || Number(target) <= 0) {
+        showParamError(t('errNoTarget'));
+        return false;
+      }
+
+      const min = parseInt(document.getElementById('min-count').value) || 1;
+      const max = parseInt(document.getElementById('max-count').value) || 10;
+      if (min > max) {
+        showParamError(t('errMinMax'));
+        return false;
+      }
+
+      return true;
+    }
+
+    function showParamError(msg) {
+      const errEl = document.getElementById('param-error');
+      errEl.textContent = msg;
+      errEl.classList.add('visible');
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function showError(msg) {
+      const panel = document.getElementById('results-panel');
+      panel.classList.add('visible');
+      document.getElementById('status-badge').textContent = 'Error';
+      document.getElementById('status-badge').className = 'status-badge status-not-found';
+      document.getElementById('elapsed').textContent = '';
+      document.getElementById('results-content').innerHTML =
+        `<div class="combination-block" style="color: var(--error)">${escapeHtml(msg)}</div>`;
+    }
+
+    function runSearch() {
+      if (!validate()) return;
+
+      setRunning(true);
+
+      const target = Math.floor(Number(document.getElementById('target').value));
+      const minCount = Math.max(1, parseInt(document.getElementById('min-count').value) || 1);
+      const maxCount = Math.max(1, parseInt(document.getElementById('max-count').value) || 10);
+      const mode = document.querySelector('input[name="mode"]:checked').value;
+
+      // Show running status
+      const panel = document.getElementById('results-panel');
+      panel.classList.add('visible');
+      document.getElementById('status-badge').innerHTML = `<span class="spinner"></span>${t('statusRunning')}`;
+      document.getElementById('status-badge').className = 'status-badge status-running';
+      document.getElementById('elapsed').textContent = '';
+      document.getElementById('results-content').innerHTML = '';
+      streamedComboCount = 0;
+
+      // Transfer numbers to worker (copy, not transfer, so we can re-use)
+      const numbersArray = Array.from(parsedNumbers);
+
+      if (mode === 'first') {
+        hideProgress();
+        worker.postMessage({
+          type: 'find_one',
+          numbers: numbersArray,
+          target,
+          minCount,
+          maxCount,
+        });
+      } else {
+        // Show progress section for "find all" mode
+        showProgress();
+        worker.postMessage({
+          type: 'find_all',
+          numbers: numbersArray,
+          target,
+          minCount,
+          maxCount,
+          maxResults: parseInt(document.getElementById('max-results').value) || 100,
+        });
+      }
+    }
+
+    function cancelSearch() {
+      if (!worker || !isRunning) return;
+      // Terminate the worker to immediately stop WASM execution.
+      // A single-threaded worker can't process cancel messages while WASM runs.
+      worker.terminate();
+      worker = null;
+      wasmReady = false;
+
+      hideProgress();
+
+      // Show cancelled status but preserve any streamed results already in the DOM
+      const panel = document.getElementById('results-panel');
+      panel.classList.add('visible');
+      const badge = document.getElementById('status-badge');
+      badge.textContent = t('statusCancelled') + (streamedComboCount > 0
+        ? ` (${streamedComboCount} ${lang === 'fa' ? 'ترکیب یافت شده' : 'found so far'})`
+        : '');
+      badge.className = 'status-badge status-cancelled';
+
+      setRunning(false);
+
+      // Re-create the worker so subsequent searches work
+      const statusEl = document.getElementById('wasm-status');
+      statusEl.classList.remove('ready', 'error');
+      statusEl.classList.add('loading');
+      const spinner = statusEl.querySelector('.spinner');
+      if (spinner) spinner.style.display = '';
+      const textEl = document.getElementById('wasm-status-text');
+      if (textEl) textEl.textContent = t('wasmLoading');
+
+      initWorker();
+    }
+
+    function clearResults() {
+      document.getElementById('results-panel').classList.remove('visible');
+      document.getElementById('param-error').classList.remove('visible');
+      hideProgress();
+    }
+
+    // ─── Progress / Streaming ───────────────────────────────────
+    let streamedComboCount = 0;
+
+    function showProgress() {
+      const sec = document.getElementById('progress-section');
+      sec.classList.add('visible');
+      document.getElementById('progress-bar').style.width = '0%';
+      document.getElementById('stat-found').textContent = '0';
+      document.getElementById('stat-nodes').textContent = '0';
+      document.getElementById('stat-progress').textContent = '0%';
+      document.getElementById('stat-elapsed').textContent = '0s';
+    }
+
+    function hideProgress() {
+      document.getElementById('progress-section').classList.remove('visible');
+    }
+
+    function formatNumber(n) {
+      if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1) + 'B';
+      if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+      if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+      return String(n);
+    }
+
+    function updateProgress(data) {
+      const pct = Math.min(data.progress * 100, 99.9);
+      document.getElementById('progress-bar').style.width = pct.toFixed(1) + '%';
+      document.getElementById('stat-found').textContent = data.total_found.toLocaleString(lang === 'fa' ? 'fa' : 'en');
+      document.getElementById('stat-nodes').textContent = formatNumber(data.nodes_explored);
+      document.getElementById('stat-progress').textContent = pct.toFixed(1) + '%';
+
+      const secs = (data.elapsed_ms / 1000);
+      document.getElementById('stat-elapsed').textContent =
+        secs < 60 ? secs.toFixed(1) + 's' : (secs / 60).toFixed(1) + 'm';
+
+      // Stream new results into the results panel as they arrive
+      if (data.new_results && data.new_results.length > 0) {
+        const content = document.getElementById('results-content');
+        for (const combo of data.new_results) {
+          streamedComboCount++;
+          content.insertAdjacentHTML('beforeend', renderCombination(combo, streamedComboCount));
+        }
+      }
+
+      // Update elapsed in the status bar too
+      const elapsed = data.elapsed_ms != null ? data.elapsed_ms.toFixed(0) : '?';
+      document.getElementById('elapsed').textContent = `${elapsed} ${t('elapsed')}`;
+    }
+
+    // ─── Display Results ──────────────────────────────────────────
+    function displayResult(data) {
+      const panel = document.getElementById('results-panel');
+      panel.classList.add('visible');
+
+      const badge = document.getElementById('status-badge');
+      const elapsedEl = document.getElementById('elapsed');
+      const content = document.getElementById('results-content');
+
+      const elapsed = data.elapsed_ms != null ? data.elapsed_ms.toFixed(2) : '?';
+      elapsedEl.textContent = `${elapsed} ${t('elapsed')}`;
+
+      if (data.status === 'found') {
+        badge.textContent = t('statusFound');
+        badge.className = 'status-badge status-found';
+
+        if (data.combinations) {
+          // "Find all" mode — results were already streamed into the DOM via
+          // updateProgress(). Just prepend a summary line.
+          const summary = document.createElement('div');
+          summary.style.cssText = 'margin-bottom:12px;color:var(--text-dim);font-size:0.85rem';
+          summary.textContent = t('totalCombos')(data.total);
+          content.prepend(summary);
+        } else {
+          // "Find one" mode — single result, render now
+          content.innerHTML = renderCombination(data, 1);
+        }
+      } else if (data.status === 'cancelled') {
+        badge.textContent = t('statusCancelled');
+        badge.className = 'status-badge status-cancelled';
+        content.innerHTML = '';
+      } else {
+        badge.textContent = t('statusNotFound');
+        badge.className = 'status-badge status-not-found';
+        content.innerHTML = '';
+      }
+    }
+
+    function renderCombination(combo, num) {
+      let html = `<div class="combination-block">`;
+      html += `<div class="combination-header">${t('comboHeader')(num)} — ${t('comboCount')(combo.count)}</div>`;
+      html += `<table class="result-table"><thead><tr>`;
+      html += `<th>#</th><th>${t('rowIndex')}</th><th>${t('rowValue')}</th>`;
+      html += `</tr></thead><tbody>`;
+
+      const loc = lang === 'fa' ? 'fa' : 'en';
+      let bigSum = 0n;
+      for (let i = 0; i < combo.values.length; i++) {
+        const rowIdx = combo.indices[i] + 1; // 1-based for display (original CSV row)
+        const val = BigInt(Math.floor(combo.values[i]));
+        bigSum += val;
+        html += `<tr><td>${i + 1}</td><td>${rowIdx.toLocaleString(loc)}</td>`;
+        html += `<td>${val.toLocaleString(loc)}</td></tr>`;
+      }
+
+      // Show sum (computed in BigInt to avoid float precision loss)
+      html += `<tr style="border-top:2px solid var(--border);font-weight:600">`;
+      html += `<td colspan="2">${lang === 'fa' ? 'مجموع' : 'Sum'}</td>`;
+      html += `<td>${bigSum.toLocaleString(loc)}</td></tr>`;
+
+      html += `</tbody></table></div>`;
+      return html;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+wasm-solver/target/
+wasm-solver/.git/
+wasm-solver/src/
+wasm-solver/tests/
+wasm-solver/Cargo.toml
+wasm-solver/Cargo.lock
+wasm-solver/LICENSE_*
+wasm-solver/README.md
+wasm-solver/.gitignore
+test_data.csv
+sample_medium.csv
+*.md
+.git/
