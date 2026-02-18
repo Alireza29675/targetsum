@@ -1,11 +1,16 @@
 FROM nginx:alpine
 
-# Correct MIME type for WebAssembly files
-RUN echo 'types { application/wasm wasm; }' > /etc/nginx/conf.d/wasm-mime.conf
+# Remove default config
+RUN rm /etc/nginx/conf.d/default.conf
 
-# Copy the app into nginx's default serve directory
+# Add our config template (PORT_PLACEHOLDER gets replaced at startup)
+COPY nginx.conf /etc/nginx/conf.d/app.conf.template
+
+# Copy the app
 COPY index.html /usr/share/nginx/html/
 COPY worker.js /usr/share/nginx/html/
 COPY wasm-solver/pkg/ /usr/share/nginx/html/wasm-solver/pkg/
 
-EXPOSE 80
+# At runtime, substitute $PORT into nginx config and start nginx.
+# Railway injects PORT; default to 80 if not set.
+CMD sh -c "sed 's/PORT_PLACEHOLDER/'\"${PORT:-80}\"'/' /etc/nginx/conf.d/app.conf.template > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
